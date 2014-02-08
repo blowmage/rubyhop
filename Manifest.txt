@@ -1,0 +1,16 @@
+.autotest
+History.txt
+Manifest.txt
+README.txt
+Rakefile
+bin/rubyhop
+lib/background.png
+lib/gameover.mp3
+lib/hoop.png
+lib/hop.mp3
+lib/music.mp3
+lib/rubyguy-dead.png
+lib/rubyguy-fall.png
+lib/rubyguy-rise.png
+lib/rubyhop.rb
+test/test_rubyhop.rb

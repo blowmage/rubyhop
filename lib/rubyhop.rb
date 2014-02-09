@@ -28,7 +28,7 @@ class Player
     end
   end
   def start!
-    @x = @window.width/2
+    @x = @window.width/3
     @y = @window.height/2
     @velocity = 0.0
     @alive = true
@@ -105,7 +105,7 @@ class HopLevel
     @hoops = 6.times.map { Hoop.new self }
     init_hoops!
     @font = Gosu::Font.new @window, Gosu::default_font_name, 20
-    @movement = 2
+    @movement = 3
 
     # Add callback holders
     @fail_callbacks = []
@@ -122,7 +122,7 @@ class HopLevel
 
   def start!
     @score = 0
-    @movement = 2
+    @movement = 3
     @player.start!
     init_hoops!
   end
@@ -139,7 +139,7 @@ class HopLevel
     @hoops.each do |hoop|
       hoop.y = 325
     end
-    hoop_start = 600
+    hoop_start = 400
     @hoops.each do |hoop|
       reset_hoop! hoop
       hoop_start += 200
@@ -162,7 +162,7 @@ class HopLevel
   end
 
   def update
-    @movement += 0.003
+    @movement += 0.0025
     @player.update
     @hoops.each do |hoop|
       hoop.update

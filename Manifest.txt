@@ -12,5 +12,6 @@ lib/music.mp3
 lib/rubyguy-dead.png
 lib/rubyguy-fall.png
 lib/rubyguy-rise.png
+lib/rubyguy.png
 lib/rubyhop.rb
 test/test_rubyhop.rb

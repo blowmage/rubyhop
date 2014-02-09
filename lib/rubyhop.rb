@@ -101,7 +101,6 @@ class HopLevel
     @window.caption = "Ruby Hop"
     @music = Gosu::Song.new @window, get_my_file("music.mp3")
     @music.play true
-    @background = Gosu::Image.new @window, get_my_file("background.png")
     @player = Player.new self
     @hoops = 6.times.map { Hoop.new self }
     init_hoops!
@@ -178,7 +177,6 @@ class HopLevel
   end
 
   def draw
-    @background.draw 0, 0, 0
     @player.draw
     @hoops.each &:draw
     @font.draw "Score: #{@score}", 700, 10, 1, 1.0, 1.0, Gosu::Color::RED
@@ -189,7 +187,6 @@ class FailLevel
   attr_accessor :window
   def initialize window
     @window = window
-    @background = Gosu::Image.new @window, get_my_file("background.png")
     @rubyguy = Gosu::Image.new @window, get_my_file("rubyguy.png")
 
     create_image!
@@ -238,7 +235,6 @@ class FailLevel
   end
 
   def draw
-    @background.draw 0, 0, 0
     c = Math.cos(@window.time*4)
     @rubyguy.draw_rot(((@window.width)/2), ((@window.height)/2 - 80), 1, 0,
                       0.5, 0.5, 1.0+c*0.1, 1.0+c*0.1)
@@ -258,6 +254,7 @@ class RubyhopGame < Gosu::Window
     super
 
     self.caption = 'Ruby Hop'
+    @background = Gosu::Image.new self, get_my_file("background.png")
 
     # Scores
     @score = @high_score = 0
@@ -301,6 +298,7 @@ class RubyhopGame < Gosu::Window
   end
 
   def draw
+    @background.draw 0, 0, 0
     @level.draw
   end
 end

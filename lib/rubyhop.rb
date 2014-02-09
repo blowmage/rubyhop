@@ -5,7 +5,7 @@ def get_my_file file
 end
 
 class Player
-  attr_accessor :x, :y
+  attr_accessor :x, :y, :alive
   def initialize window
     @window = window
     @alive  = true
@@ -65,18 +65,14 @@ class Player
 end
 
 class Hoop
-  attr_accessor :x, :y
+  attr_accessor :x, :y, :active
   def initialize window
     @window   = window
     @hoop  = Gosu::Image.new window, get_my_file("hoop.png")
     # center of screen
     @movement = 2
     @x = @y = 0
-    reset_position!
-  end
-  def reset_position!
-    @x += 1200
-    @y = rand 150..500
+    @active = true
   end
   def miss player
     if (@x - player.x).abs < 12 &&
@@ -87,7 +83,6 @@ class Hoop
      false
   end
   def update
-    reset_position! if @x < -200
     @movement += 0.003
     @x -= @movement
   end
@@ -107,15 +102,28 @@ class RubyhopGame < Gosu::Window
     @player = Player.new self
     @hoops = 6.times.map { Hoop.new self }
     init_hoops!
+    @score = 0
   end
 
   def init_hoops!
+    @hoops.each do |hoop|
+      hoop.y = 325
+    end
     hoop_start = 600
     @hoops.each do |hoop|
+      reset_hoop! hoop
       hoop_start += 200
-      hoop.reset_position!
       hoop.x = hoop_start
     end
+  end
+
+  def reset_hoop! hoop
+    idx = @hoops.index hoop
+    prev = @hoops[idx - 1]
+    new_y = ((prev.y-150..prev.y+125).to_a & (150..500).to_a).sample
+    hoop.x += 1200
+    hoop.y = new_y
+    hoop.active = true
   end
 
   def button_down id
@@ -127,7 +135,14 @@ class RubyhopGame < Gosu::Window
     @player.update
     @hoops.each do |hoop|
       hoop.update
+      reset_hoop!(hoop) if hoop.x < -200
       @player.die! if hoop.miss @player
+      # increase score and flag as inactive
+      if hoop.active && @player.alive && hoop.x < @player.x
+        @score += 1
+        hoop.active = false
+        self.caption = "Ruby Hop: #{@score}"
+      end
     end
   end
 

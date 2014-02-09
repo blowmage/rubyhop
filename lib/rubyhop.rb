@@ -103,6 +103,7 @@ class RubyhopGame < Gosu::Window
     @hoops = 6.times.map { Hoop.new self }
     init_hoops!
     @score = 0
+    @font = Gosu::Font.new self, Gosu::default_font_name, 20
   end
 
   def init_hoops!
@@ -141,7 +142,6 @@ class RubyhopGame < Gosu::Window
       if hoop.active && @player.alive && hoop.x < @player.x
         @score += 1
         hoop.active = false
-        self.caption = "Ruby Hop: #{@score}"
       end
     end
   end
@@ -150,5 +150,6 @@ class RubyhopGame < Gosu::Window
     @background.draw 0, 0, 0
     @player.draw
     @hoops.each &:draw
+    @font.draw "Score: #{@score}", 700, 10, 1, 1.0, 1.0, Gosu::Color::RED
   end
 end

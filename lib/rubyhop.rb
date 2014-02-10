@@ -98,7 +98,6 @@ class HopLevel
   attr_accessor :window, :movement, :score
   def initialize window
     @window = window
-    @window.caption = "Ruby Hop"
     @music = Gosu::Song.new @window, get_my_file("music.mp3")
     @music.play true
     @player = Player.new self
@@ -316,7 +315,7 @@ class RubyhopGame < Gosu::Window
   def initialize width=800, height=600, fullscreen=false
     super
 
-    self.caption = 'Ruby Hop'
+    self.caption = "Ruby Hop - #{VERSION}"
     @background = Gosu::Image.new self, get_my_file("background.png")
 
     # Scores

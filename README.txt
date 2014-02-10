@@ -19,7 +19,13 @@ After checking out the source, run:
 This task will install any missing dependencies, run the tests/specs,
 and generate the RDoc.
 
-== LICENSE:
+After making changes, run the game:
+
+  $ rake run
+
+== LICENSES
+
+All source code is copyright MIT license. All rights reserved for graphic and audio assets.
 
 (The MIT License)
 

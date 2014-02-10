@@ -310,7 +310,7 @@ class FailLevel
 end
 
 class RubyhopGame < Gosu::Window
-  VERSION = "1.3.0"
+  VERSION = "1.3.1"
   attr_reader :time, :sounds, :score, :high_score
   def initialize width=800, height=600, fullscreen=false
     super

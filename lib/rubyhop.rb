@@ -246,8 +246,6 @@ class MessageLevel < Level
 
   def create_image!
     @msg = Image.from_text message
-    @msg_x = RubyhopGame.width/2 - @msg.width/2
-    @msg_y = RubyhopGame.height * 2 / 3
   end
 
   def start!

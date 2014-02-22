@@ -210,7 +210,8 @@ class HopLevel < Level
   end
 end
 
-class TitleLevel < Level
+class MessageLevel < Level
+  attr_accessor :message
   def initialize window
     super
     @rubyguy = Gosu::Image.new @window, get_my_file("rubyguy.png")
@@ -218,12 +219,14 @@ class TitleLevel < Level
     create_image!
   end
 
+  def message
+    "This is a dumb message, you should override it"
+  end
+
   def create_image!
     @msg = Gosu::Image.from_text @window,
-                                "Stay alive by hopping!\n" +
-                                "Press SPACE to hop!\n" +
-                                "Press ESCAPE to close.",
-                                Gosu::default_font_name, 24
+                                 message,
+                                 Gosu::default_font_name, 24
     @msg_x = @window.width/2 - @msg.width/2
     @msg_y = @window.height * 2 / 3
   end
@@ -252,16 +255,20 @@ class TitleLevel < Level
   end
 end
 
-class FailLevel < TitleLevel
-  def create_image!
-    @msg = Gosu::Image.from_text @window,
-                                "You scored #{@window.score}.\n" +
-                                "Your high score is #{@window.high_score}.\n" +
-                                "Press SPACE if you dare to continue...\n" +
-                                "Or ESCAPE if it is just too much for you.",
-                                Gosu::default_font_name, 24
-    @msg_x = @window.width/2 - @msg.width/2
-    @msg_y = @window.height * 2 / 3
+class TitleLevel < MessageLevel
+  def message
+    "Stay alive by hopping!\n" +
+    "Press SPACE to hop!\n" +
+    "Press ESCAPE to close."
+  end
+end
+
+class FailLevel < MessageLevel
+  def message
+    "You scored #{@window.score}.\n" +
+    "Your high score is #{@window.high_score}.\n" +
+    "Press SPACE if you dare to continue...\n" +
+    "Or ESCAPE if it is just too much for you."
   end
 end
 

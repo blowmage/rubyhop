@@ -63,7 +63,9 @@ class Song < Gosu::Song
 end
 
 class Image < Gosu::Image
+  attr_accessor :filename
   def initialize filename
+    @filename = filename
     super RubyhopGame.instance, get_my_file(filename)
   end
 

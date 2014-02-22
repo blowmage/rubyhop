@@ -56,3 +56,45 @@ class TestLevel < MiniTest::Test
     end
   end
 end
+
+class TestPlayer < MiniTest::Test
+
+  def setup
+    @player = Player.new
+  end
+
+  def test_initialization
+    assert_equal 266, @player.x
+    assert_equal 300, @player.y
+    assert_equal true, @player.alive
+    assert_equal 'rubyguy-rise.png', @player.image.filename
+  end
+
+  def test_hop
+    @player.hop
+    @player.update
+    assert_equal 266, @player.x
+    assert_equal 292.75, @player.y
+  end
+
+  def test_gravity
+    3.times do
+      @player.update
+    end
+    assert_equal 'rubyguy-fall.png', @player.image.filename
+  end
+
+  def test_die_bang
+    @player.die!
+    assert_equal false, @player.alive
+    assert_equal 'rubyguy-dead.png', @player.image.filename
+  end
+
+  def test_offscreen_eh
+    assert_equal false, @player.offscreen?
+    140.times do
+      @player.update
+    end
+    assert_equal true, @player.offscreen?
+  end
+end

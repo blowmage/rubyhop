@@ -148,8 +148,8 @@ class Hoop
        (@y - player.y).abs > 72
        # the player missed the hoop
        return true
-     end
-     false
+    end
+    false
   end
   def update movement
     @x -= movement
@@ -226,13 +226,12 @@ class HopLevel < Level
 
   def draw
     @player.draw
-    @hoops.each &:draw
+    @hoops.each(&:draw)
     @font.draw "Score: #{@score}", 700, 10, 1, 1.0, 1.0, Gosu::Color::RED
   end
 end
 
 class MessageLevel < Level
-  attr_accessor :message
   def initialize
     super
     @rubyguy = Image.new "rubyguy.png"

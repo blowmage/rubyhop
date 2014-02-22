@@ -1,4 +1,5 @@
 require "gosu"
+require "singleton"
 
 def get_my_file file
   "#{File.dirname(__FILE__)}/#{file}"
@@ -274,7 +275,15 @@ end
 
 class RubyhopGame < Gosu::Window
   VERSION = "1.3.1"
+
+  include Singleton
+
   attr_reader :time, :sounds, :score, :high_score
+
+  def self.play!
+    self.instance.show
+  end
+
   def initialize width=800, height=600, fullscreen=false
     super
 

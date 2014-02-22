@@ -142,10 +142,10 @@ class Hoop
   end
 end
 
-class HopLevel
-  attr_accessor :window, :movement, :score
+class HopLevel < Level
+  attr_accessor :movement, :score
   def initialize window
-    @window = window
+    super
     @music = Gosu::Song.new @window, get_my_file("music.mp3")
     @music.play true
     @player = Player.new self
@@ -153,18 +153,6 @@ class HopLevel
     init_hoops!
     @font = Gosu::Font.new @window, Gosu::default_font_name, 20
     @movement = 3
-
-    # Add callback holders
-    @fail_callbacks = []
-    @quit_callbacks = []
-  end
-
-  def on_fail &block
-    @fail_callbacks << block
-  end
-
-  def on_quit &block
-    @quit_callbacks << block
   end
 
   def start!
@@ -172,14 +160,6 @@ class HopLevel
     @movement = 3
     @player.start!
     init_hoops!
-  end
-
-  def fail!
-    @fail_callbacks.each { |c| c.call }
-  end
-
-  def quit!
-    @quit_callbacks.each { |c| c.call }
   end
 
   def init_hoops!
@@ -230,17 +210,12 @@ class HopLevel
   end
 end
 
-class TitleLevel
-  attr_accessor :window
+class TitleLevel < Level
   def initialize window
-    @window = window
+    super
     @rubyguy = Gosu::Image.new @window, get_my_file("rubyguy.png")
 
     create_image!
-
-    # Add callback holders
-    @continue_callbacks = []
-    @quit_callbacks = []
   end
 
   def create_image!
@@ -251,22 +226,6 @@ class TitleLevel
                                 Gosu::default_font_name, 24
     @msg_x = @window.width/2 - @msg.width/2
     @msg_y = @window.height * 2 / 3
-  end
-
-  def on_continue &block
-    @continue_callbacks << block
-  end
-
-  def on_quit &block
-    @quit_callbacks << block
-  end
-
-  def continue!
-    @continue_callbacks.each { |c| c.call }
-  end
-
-  def quit!
-    @quit_callbacks.each { |c| c.call }
   end
 
   def start!
@@ -293,17 +252,12 @@ class TitleLevel
   end
 end
 
-class FailLevel
-  attr_accessor :window
+class FailLevel < Level
   def initialize window
-    @window = window
+    super
     @rubyguy = Gosu::Image.new @window, get_my_file("rubyguy.png")
 
     create_image!
-
-    # Add callback holders
-    @continue_callbacks = []
-    @quit_callbacks = []
   end
 
   def create_image!
@@ -315,22 +269,6 @@ class FailLevel
                                 Gosu::default_font_name, 24
     @msg_x = @window.width/2 - @msg.width/2
     @msg_y = @window.height * 2 / 3
-  end
-
-  def on_continue &block
-    @continue_callbacks << block
-  end
-
-  def on_quit &block
-    @quit_callbacks << block
-  end
-
-  def continue!
-    @continue_callbacks.each { |c| c.call }
-  end
-
-  def quit!
-    @quit_callbacks.each { |c| c.call }
   end
 
   def start!

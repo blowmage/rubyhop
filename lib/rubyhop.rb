@@ -252,14 +252,7 @@ class TitleLevel < Level
   end
 end
 
-class FailLevel < Level
-  def initialize window
-    super
-    @rubyguy = Gosu::Image.new @window, get_my_file("rubyguy.png")
-
-    create_image!
-  end
-
+class FailLevel < TitleLevel
   def create_image!
     @msg = Gosu::Image.from_text @window,
                                 "You scored #{@window.score}.\n" +
@@ -269,29 +262,6 @@ class FailLevel < Level
                                 Gosu::default_font_name, 24
     @msg_x = @window.width/2 - @msg.width/2
     @msg_y = @window.height * 2 / 3
-  end
-
-  def start!
-    create_image!
-  end
-
-  def update
-    quit!     if @window.button_down? Gosu::KbEscape
-    continue! if ( @window.button_down?(Gosu::KbSpace)  ||
-                   @window.button_down?(Gosu::KbReturn) ||
-                   @window.button_down?(Gosu::KbEnter)  )
-  end
-
-  def draw
-    c = Math.cos(@window.time*4)
-    @rubyguy.draw_rot(((@window.width)/2), ((@window.height)/2 - 80), 1, 0,
-                      0.5, 0.5, 1.0+c*0.1, 1.0+c*0.1)
-    s = Math.sin @window.time
-    @msg.draw_rot( ((@window.width)/2 + (100*(s)).to_i),
-                    ((@window.height)/2 + 160 + s*s*s.abs*50),
-                    1, s*5, 0.5, 0.5,
-                    1.0+(0.1*s*s*s.abs), 1.0+(0.1*s*s*s.abs),
-                    Gosu::Color::RED )
   end
 end
 

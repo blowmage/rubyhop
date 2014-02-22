@@ -4,6 +4,54 @@ def get_my_file file
   "#{File.dirname(__FILE__)}/#{file}"
 end
 
+class Level
+  attr_accessor :window
+  def initialize window
+    @window = window
+
+    # Add callback holders
+    @continue_callbacks = []
+    @quit_callbacks = []
+    @fail_callbacks = []
+  end
+
+  def on_continue &block
+    @continue_callbacks << block
+  end
+
+  def on_quit &block
+    @quit_callbacks << block
+  end
+
+  def on_fail &block
+    @fail_callbacks << block
+  end
+
+  def continue!
+    @continue_callbacks.each { |c| c.call }
+  end
+
+  def quit!
+    @quit_callbacks.each { |c| c.call }
+  end
+
+  def fail!
+    @fail_callbacks.each { |c| c.call }
+  end
+
+  def start!
+    raise "Must override"
+  end
+
+  def update
+    raise "Must override"
+  end
+
+  def draw
+    raise "Must override"
+  end
+end
+
 class Player
   attr_accessor :x, :y, :alive
   def initialize level

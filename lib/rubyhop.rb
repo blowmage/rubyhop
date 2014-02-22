@@ -53,6 +53,30 @@ class Level
   end
 end
 
+class Sound < Gosu::Sample
+  def initialize filename
+    super RubyhopGame.instance, get_my_file(filename)
+  end
+end
+
+class Song < Gosu::Song
+  def initialize filename
+    super RubyhopGame.instance, get_my_file(filename)
+  end
+end
+
+class Image < Gosu::Image
+  def initialize filename
+    super RubyhopGame.instance, get_my_file(filename)
+  end
+
+  def self.from_text message
+    super RubyhopGame.instance,
+          message,
+          Gosu::default_font_name, 24
+  end
+end
+
 class Player
   attr_accessor :x, :y, :alive
   def initialize level
@@ -63,12 +87,12 @@ class Player
     @gravity  = -0.25
     @hop      = 7.5
     # sounds
-    @sound    = Gosu::Sample.new @window, get_my_file("hop.mp3")
-    @gameover = Gosu::Sample.new @window, get_my_file("gameover.mp3")
+    @sound    = Sound.new "hop.mp3"
+    @gameover = Sound.new "gameover.mp3"
     # images
-    @rise = Gosu::Image.new @window, get_my_file("rubyguy-rise.png")
-    @fall = Gosu::Image.new @window, get_my_file("rubyguy-fall.png")
-    @dead = Gosu::Image.new @window, get_my_file("rubyguy-dead.png")
+    @rise = Image.new "rubyguy-rise.png"
+    @fall = Image.new "rubyguy-fall.png"
+    @dead = Image.new "rubyguy-dead.png"
   end
   def hop
     if @alive
@@ -122,7 +146,7 @@ class Hoop
   def initialize level
     @level = level
     @window   = @level.window
-    @hoop  = Gosu::Image.new @window, get_my_file("hoop.png")
+    @hoop  = Image.new "hoop.png"
     # center of screen
     @x = @y = 0
     @active = true
@@ -147,7 +171,7 @@ class HopLevel < Level
   attr_accessor :movement, :score
   def initialize window
     super
-    @music = Gosu::Song.new @window, get_my_file("music.mp3")
+    @music = Song.new "music.mp3"
     @music.play true
     @player = Player.new self
     @hoops = 6.times.map { Hoop.new self }
@@ -215,7 +239,7 @@ class MessageLevel < Level
   attr_accessor :message
   def initialize window
     super
-    @rubyguy = Gosu::Image.new @window, get_my_file("rubyguy.png")
+    @rubyguy = Image.new "rubyguy.png"
 
     create_image!
   end
@@ -225,9 +249,7 @@ class MessageLevel < Level
   end
 
   def create_image!
-    @msg = Gosu::Image.from_text @window,
-                                 message,
-                                 Gosu::default_font_name, 24
+    @msg = Image.from_text message
     @msg_x = @window.width/2 - @msg.width/2
     @msg_y = @window.height * 2 / 3
   end
@@ -281,14 +303,16 @@ class RubyhopGame < Gosu::Window
   attr_reader :time, :sounds, :score, :high_score
 
   def self.play!
-    self.instance.show
+    self.instance.setup.show
   end
 
   def initialize width=800, height=600, fullscreen=false
     super
+  end
 
+  def setup
     self.caption = "Ruby Hop - #{VERSION}"
-    @background = Gosu::Image.new self, get_my_file("background.png")
+    @background = Image.new "background.png"
 
     # Scores
     @score = @high_score = 0
@@ -308,6 +332,7 @@ class RubyhopGame < Gosu::Window
     @fail.on_quit      { close }
 
     title!
+    self
   end
 
   def title!

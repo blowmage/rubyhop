@@ -261,14 +261,18 @@ class MessageLevel < Level
 
   def draw
     c = Math.cos(RubyhopGame.time*4)
-    @rubyguy.draw_rot(((RubyhopGame.width)/2), ((RubyhopGame.height)/2 - 80), 1, 0,
-                      0.5, 0.5, 1.0+c*0.1, 1.0+c*0.1)
+    half_w = RubyhopGame.width / 2
+    half_h = RubyhopGame.height / 2
+    scale  = 1.0+c*0.1
+    @rubyguy.draw_rot(half_w, half_h - 80, 1,
+                      0, 0.5, 0.5, scale, scale)
+
     s = Math.sin RubyhopGame.time
-    @msg.draw_rot( ((RubyhopGame.width)/2 + (100*(s)).to_i),
-                    ((RubyhopGame.height)/2 + 160 + s*s*s.abs*50),
-                    1, s*5, 0.5, 0.5,
-                    1.0+(0.1*s*s*s.abs), 1.0+(0.1*s*s*s.abs),
-                    Gosu::Color::RED )
+    scale = 1.0+(0.1*s**3).abs
+    @msg.draw_rot( (half_w + (100*(s)).to_i),
+                   (half_h + 160 + (50*s**3).abs),
+                   1, s*5, 0.5, 0.5, scale, scale,
+                   Gosu::Color::RED )
   end
 end
 

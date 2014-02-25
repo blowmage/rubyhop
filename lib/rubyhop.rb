@@ -5,7 +5,7 @@ require "rubyhop/player"
 require "rubyhop/hoop"
 
 def get_my_file file
-  "#{File.dirname(__FILE__)}/#{file}"
+  "#{File.dirname(__FILE__)}/rubyhop/assets/#{file}"
 end
 
 class Sound < Gosu::Sample

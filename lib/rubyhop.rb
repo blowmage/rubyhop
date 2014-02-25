@@ -1,25 +1,95 @@
 require "gosu"
+require "singleton"
 
 def get_my_file file
   "#{File.dirname(__FILE__)}/#{file}"
 end
 
+class Level
+  def initialize
+    # Add callback holders
+    @continue_callbacks = []
+    @quit_callbacks = []
+    @fail_callbacks = []
+  end
+
+  def on_continue &block
+    @continue_callbacks << block
+  end
+
+  def on_quit &block
+    @quit_callbacks << block
+  end
+
+  def on_fail &block
+    @fail_callbacks << block
+  end
+
+  def continue!
+    @continue_callbacks.each { |c| c.call }
+  end
+
+  def quit!
+    @quit_callbacks.each { |c| c.call }
+  end
+
+  def fail!
+    @fail_callbacks.each { |c| c.call }
+  end
+
+  def start!
+    raise "Must override"
+  end
+
+  def update
+    raise "Must override"
+  end
+
+  def draw
+    raise "Must override"
+  end
+end
+
+class Sound < Gosu::Sample
+  def initialize filename
+    super RubyhopGame.instance, get_my_file(filename)
+  end
+end
+
+class Song < Gosu::Song
+  def initialize filename
+    super RubyhopGame.instance, get_my_file(filename)
+  end
+end
+
+class Image < Gosu::Image
+  attr_accessor :filename
+  def initialize filename
+    @filename = filename
+    super RubyhopGame.instance, get_my_file(filename)
+  end
+
+  def self.from_text message
+    super RubyhopGame.instance,
+          message,
+          Gosu::default_font_name, 24
+  end
+end
+
 class Player
   attr_accessor :x, :y, :alive
-  def initialize level
-    @level = level
-    @window = @level.window
+  def initialize
     # position
     start!
     @gravity  = -0.25
     @hop      = 7.5
     # sounds
-    @sound    = Gosu::Sample.new @window, get_my_file("hop.mp3")
-    @gameover = Gosu::Sample.new @window, get_my_file("gameover.mp3")
+    @sound    = Sound.new "hop.mp3"
+    @gameover = Sound.new "gameover.mp3"
     # images
-    @rise = Gosu::Image.new @window, get_my_file("rubyguy-rise.png")
-    @fall = Gosu::Image.new @window, get_my_file("rubyguy-fall.png")
-    @dead = Gosu::Image.new @window, get_my_file("rubyguy-dead.png")
+    @rise = Image.new "rubyguy-rise.png"
+    @fall = Image.new "rubyguy-fall.png"
+    @dead = Image.new "rubyguy-dead.png"
   end
   def hop
     if @alive
@@ -28,8 +98,8 @@ class Player
     end
   end
   def start!
-    @x = @window.width/3
-    @y = @window.height/2
+    @x = RubyhopGame.width / 3
+    @y = RubyhopGame.height / 2
     @velocity = 0.0
     @alive = true
   end
@@ -44,13 +114,12 @@ class Player
   def update
     @velocity += @gravity
     @y -= @velocity
-    if @alive && (@y < 32 || @y > @window.height - 32)
+    if @alive && (@y < 32 || @y > RubyhopGame.height - 32)
       die!
     end
-    if @y > 1000
-      # kick out to loading screen to try again?
-      @level.fail!
-    end
+  end
+  def offscreen?
+    @y > 1000
   end
   def draw
     image.draw @x - 32, @y - 32, 1000 - @x
@@ -70,10 +139,8 @@ end
 
 class Hoop
   attr_accessor :x, :y, :active
-  def initialize level
-    @level = level
-    @window   = @level.window
-    @hoop  = Gosu::Image.new @window, get_my_file("hoop.png")
+  def initialize
+    @hoop  = Image.new "hoop.png"
     # center of screen
     @x = @y = 0
     @active = true
@@ -83,40 +150,28 @@ class Hoop
        (@y - player.y).abs > 72
        # the player missed the hoop
        return true
-     end
-     false
+    end
+    false
   end
-  def update
-    @x -= @level.movement
+  def update movement
+    @x -= movement
   end
   def draw
     @hoop.draw @x - 66, @y - 98, 1000 - @x
   end
 end
 
-class HopLevel
-  attr_accessor :window, :movement, :score
-  def initialize window
-    @window = window
-    @music = Gosu::Song.new @window, get_my_file("music.mp3")
+class HopLevel < Level
+  attr_accessor :movement, :score
+  def initialize
+    super
+    @music = Song.new "music.mp3"
     @music.play true
-    @player = Player.new self
-    @hoops = 6.times.map { Hoop.new self }
+    @player = Player.new
+    @hoops = 6.times.map { Hoop.new }
     init_hoops!
-    @font = Gosu::Font.new @window, Gosu::default_font_name, 20
+    @font = Gosu::Font.new RubyhopGame.instance, Gosu::default_font_name, 20
     @movement = 3
-
-    # Add callback holders
-    @fail_callbacks = []
-    @quit_callbacks = []
-  end
-
-  def on_fail &block
-    @fail_callbacks << block
-  end
-
-  def on_quit &block
-    @quit_callbacks << block
   end
 
   def start!
@@ -124,14 +179,6 @@ class HopLevel
     @movement = 3
     @player.start!
     init_hoops!
-  end
-
-  def fail!
-    @fail_callbacks.each { |c| c.call }
-  end
-
-  def quit!
-    @quit_callbacks.each { |c| c.call }
   end
 
   def init_hoops!
@@ -163,8 +210,12 @@ class HopLevel
   def update
     @movement += 0.0025
     @player.update
+    if @player.offscreen?
+      # kick out to loading screen to try again?
+      fail!
+    end
     @hoops.each do |hoop|
-      hoop.update
+      hoop.update @movement
       reset_hoop!(hoop) if hoop.x < -200
       @player.die! if hoop.miss @player
       # increase score and flag as inactive
@@ -177,48 +228,25 @@ class HopLevel
 
   def draw
     @player.draw
-    @hoops.each &:draw
+    @hoops.each(&:draw)
     @font.draw "Score: #{@score}", 700, 10, 1, 1.0, 1.0, Gosu::Color::RED
   end
 end
 
-class TitleLevel
-  attr_accessor :window
-  def initialize window
-    @window = window
-    @rubyguy = Gosu::Image.new @window, get_my_file("rubyguy.png")
+class MessageLevel < Level
+  def initialize
+    super
+    @rubyguy = Image.new "rubyguy.png"
 
     create_image!
+  end
 
-    # Add callback holders
-    @continue_callbacks = []
-    @quit_callbacks = []
+  def message
+    "This is a dumb message, you should override it"
   end
 
   def create_image!
-    @msg = Gosu::Image.from_text @window,
-                                "Stay alive by hopping!\n" +
-                                "Press SPACE to hop!\n" +
-                                "Press ESCAPE to close.",
-                                Gosu::default_font_name, 24
-    @msg_x = @window.width/2 - @msg.width/2
-    @msg_y = @window.height * 2 / 3
-  end
-
-  def on_continue &block
-    @continue_callbacks << block
-  end
-
-  def on_quit &block
-    @quit_callbacks << block
-  end
-
-  def continue!
-    @continue_callbacks.each { |c| c.call }
-  end
-
-  def quit!
-    @quit_callbacks.each { |c| c.call }
+    @msg = Image.from_text message
   end
 
   def start!
@@ -226,105 +254,76 @@ class TitleLevel
   end
 
   def update
-    quit!     if @window.button_down? Gosu::KbEscape
-    continue! if ( @window.button_down?(Gosu::KbSpace)  ||
-                   @window.button_down?(Gosu::KbReturn) ||
-                   @window.button_down?(Gosu::KbEnter)  )
+    quit!     if RubyhopGame.button_down? Gosu::KbEscape
+    continue! if ( RubyhopGame.button_down?(Gosu::KbSpace)  ||
+                   RubyhopGame.button_down?(Gosu::KbReturn) ||
+                   RubyhopGame.button_down?(Gosu::KbEnter)  )
   end
 
   def draw
-    c = Math.cos(@window.time*4)
-    @rubyguy.draw_rot(((@window.width)/2), ((@window.height)/2 - 80), 1, 0,
-                      0.5, 0.5, 1.0+c*0.1, 1.0+c*0.1)
-    s = Math.sin @window.time
-    @msg.draw_rot( ((@window.width)/2 + (100*(s)).to_i),
-                    ((@window.height)/2 + 160 + s*s*s.abs*50),
-                    1, s*5, 0.5, 0.5,
-                    1.0+(0.1*s*s*s.abs), 1.0+(0.1*s*s*s.abs),
-                    Gosu::Color::RED )
+    c = Math.cos(RubyhopGame.time*4)
+    half_w = RubyhopGame.width / 2
+    half_h = RubyhopGame.height / 2
+    scale  = 1.0+c*0.1
+    @rubyguy.draw_rot(half_w, half_h - 80, 1,
+                      0, 0.5, 0.5, scale, scale)
+
+    s = Math.sin RubyhopGame.time
+    scale = 1.0+(0.1*s**3).abs
+    @msg.draw_rot( (half_w + (100*(s)).to_i),
+                   (half_h + 160 + (50*s**3).abs),
+                   1, s*5, 0.5, 0.5, scale, scale,
+                   Gosu::Color::RED )
   end
 end
 
-class FailLevel
-  attr_accessor :window
-  def initialize window
-    @window = window
-    @rubyguy = Gosu::Image.new @window, get_my_file("rubyguy.png")
-
-    create_image!
-
-    # Add callback holders
-    @continue_callbacks = []
-    @quit_callbacks = []
+class TitleLevel < MessageLevel
+  def message
+    "Stay alive by hopping!\n" +
+    "Press SPACE to hop!\n" +
+    "Press ESCAPE to close."
   end
+end
 
-  def create_image!
-    @msg = Gosu::Image.from_text @window,
-                                "You scored #{@window.score}.\n" +
-                                "Your high score is #{@window.high_score}.\n" +
-                                "Press SPACE if you dare to continue...\n" +
-                                "Or ESCAPE if it is just too much for you.",
-                                Gosu::default_font_name, 24
-    @msg_x = @window.width/2 - @msg.width/2
-    @msg_y = @window.height * 2 / 3
-  end
-
-  def on_continue &block
-    @continue_callbacks << block
-  end
-
-  def on_quit &block
-    @quit_callbacks << block
-  end
-
-  def continue!
-    @continue_callbacks.each { |c| c.call }
-  end
-
-  def quit!
-    @quit_callbacks.each { |c| c.call }
-  end
-
-  def start!
-    create_image!
-  end
-
-  def update
-    quit!     if @window.button_down? Gosu::KbEscape
-    continue! if ( @window.button_down?(Gosu::KbSpace)  ||
-                   @window.button_down?(Gosu::KbReturn) ||
-                   @window.button_down?(Gosu::KbEnter)  )
-  end
-
-  def draw
-    c = Math.cos(@window.time*4)
-    @rubyguy.draw_rot(((@window.width)/2), ((@window.height)/2 - 80), 1, 0,
-                      0.5, 0.5, 1.0+c*0.1, 1.0+c*0.1)
-    s = Math.sin @window.time
-    @msg.draw_rot( ((@window.width)/2 + (100*(s)).to_i),
-                    ((@window.height)/2 + 160 + s*s*s.abs*50),
-                    1, s*5, 0.5, 0.5,
-                    1.0+(0.1*s*s*s.abs), 1.0+(0.1*s*s*s.abs),
-                    Gosu::Color::RED )
+class FailLevel < MessageLevel
+  def message
+    "You scored #{RubyhopGame.score}.\n" +
+    "Your high score is #{RubyhopGame.high_score}.\n" +
+    "Press SPACE if you dare to continue...\n" +
+    "Or ESCAPE if it is just too much for you."
   end
 end
 
 class RubyhopGame < Gosu::Window
   VERSION = "1.3.1"
+
+  include Singleton
+
   attr_reader :time, :sounds, :score, :high_score
+
+  def self.play!
+    self.instance.setup.show
+  end
+
+  def self.method_missing method, *args
+    self.instance.send(method, *args)
+  end
+
   def initialize width=800, height=600, fullscreen=false
     super
+  end
 
+  def setup
     self.caption = "Ruby Hop - #{VERSION}"
-    @background = Gosu::Image.new self, get_my_file("background.png")
+    @background = Image.new "background.png"
 
     # Scores
     @score = @high_score = 0
 
     # Levels
-    @title = TitleLevel.new self
-    @hop   = HopLevel.new   self
-    @fail  = FailLevel.new  self
+    @title = TitleLevel.new
+    @hop   = HopLevel.new
+    @fail  = FailLevel.new
 
     @title.on_continue { play! }
     @title.on_quit     { close }
@@ -336,6 +335,7 @@ class RubyhopGame < Gosu::Window
     @fail.on_quit      { close }
 
     title!
+    self
   end
 
   def title!

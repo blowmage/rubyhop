@@ -33,7 +33,7 @@ class Image < Gosu::Image
 end
 
 class Rubyhop < Gosu::Window
-  VERSION = "1.3.1"
+  VERSION = "1.4.0"
 
   include Singleton
 

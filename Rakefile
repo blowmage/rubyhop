@@ -21,5 +21,5 @@ end
 
 desc "Run the game"
 task :run do
-  `ruby -Ilib -e "require 'rubyhop'; RubyhopGame.play!"`
+  `ruby -Ilib -e "require 'rubyhop'; Rubyhop.play!"`
 end

@@ -6,12 +6,12 @@ class Player
     @gravity  = -0.25
     @hop      = 7.5
     # sounds
-    @sound    = Sound.new "hop.mp3"
-    @gameover = Sound.new "gameover.mp3"
+    @sound    = Rubyhop.sound "hop.mp3"
+    @gameover = Rubyhop.sound "gameover.mp3"
     # images
-    @rise = Image.new "rubyguy-rise.png"
-    @fall = Image.new "rubyguy-fall.png"
-    @dead = Image.new "rubyguy-dead.png"
+    @rise = Rubyhop.image "rubyguy-rise.png"
+    @fall = Rubyhop.image "rubyguy-fall.png"
+    @dead = Rubyhop.image "rubyguy-dead.png"
   end
   def hop
     if @alive

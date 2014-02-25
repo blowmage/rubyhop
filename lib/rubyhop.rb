@@ -27,10 +27,8 @@ class Image < Gosu::Image
     super Rubyhop.instance, get_my_file(filename)
   end
 
-  def self.from_text message
-    super Rubyhop.instance,
-          message,
-          Gosu::default_font_name, 24
+  def self.from_text message, font = Gosu::default_font_name, size = 24
+    super Rubyhop.instance, message, font, size
   end
 end
 
@@ -40,6 +38,26 @@ class Rubyhop < Gosu::Window
   include Singleton
 
   attr_reader :time, :sounds, :score, :high_score
+
+  def self.image filename
+    Image.new filename
+  end
+
+  def self.text_image message, font = Gosu::default_font_name, size = 24
+    Image.from_text message, font, size
+  end
+
+  def self.song filename
+    Song.new filename
+  end
+
+  def self.sound filename
+    Sound.new filename
+  end
+
+  def self.score_font
+    @@font ||= Gosu::Font.new Rubyhop.instance, Gosu::default_font_name, 20
+  end
 
   def self.play!
     self.instance.setup.show
@@ -55,7 +73,7 @@ class Rubyhop < Gosu::Window
 
   def setup
     self.caption = "Ruby Hop - #{VERSION}"
-    @background = Image.new "background.png"
+    @background = Rubyhop.image "background.png"
 
     # Scores
     @score = @high_score = 0

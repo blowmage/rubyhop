@@ -48,12 +48,11 @@ class HopLevel < Level
   attr_accessor :movement, :score
   def initialize
     super
-    @music = Song.new "music.mp3"
+    @music = Rubyhop.song "music.mp3"
     @music.play true
     @player = Player.new
     @hoops = 6.times.map { Hoop.new }
     init_hoops!
-    @font = Gosu::Font.new Rubyhop.instance, Gosu::default_font_name, 20
     @movement = 3
   end
 
@@ -112,14 +111,18 @@ class HopLevel < Level
   def draw
     @player.draw
     @hoops.each(&:draw)
-    @font.draw "Score: #{@score}", 700, 10, 1, 1.0, 1.0, Gosu::Color::RED
+    draw_score
+  end
+
+  def draw_score
+    Rubyhop.score_font.draw "Score: #{@score}", 700, 10, 1, 1.0, 1.0, Gosu::Color::RED
   end
 end
 
 class MessageLevel < Level
   def initialize
     super
-    @rubyguy = Image.new "rubyguy.png"
+    @rubyguy = Rubyhop.image "rubyguy.png"
 
     create_image!
   end
@@ -129,7 +132,7 @@ class MessageLevel < Level
   end
 
   def create_image!
-    @msg = Image.from_text message
+    @msg = Rubyhop.text_image message
   end
 
   def start!

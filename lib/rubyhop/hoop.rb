@@ -1,7 +1,7 @@
 class Hoop
   attr_accessor :x, :y, :active
   def initialize
-    @hoop  = Image.new "hoop.png"
+    @hoop  = Rubyhop.image "hoop.png"
     # center of screen
     @x = @y = 0
     @active = true
